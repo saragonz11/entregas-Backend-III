@@ -1,0 +1,138 @@
+paths:
+  /api/users:
+    get:
+      summary: Obtener todos los usuarios
+      tags:
+        - Users
+      description: Retorna el listado completo de usuarios registrados en la base de datos.
+      responses:
+        "200":
+          description: Listado de usuarios obtenido correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  payload:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        "500":
+          description: Error interno del servidor
+
+  /api/users/{uid}:
+    get:
+      summary: Obtener un usuario por ID
+      tags:
+        - Users
+      description: Retorna un usuario específico según el ID recibido por parámetro.
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario a consultar
+          schema:
+            type: string
+            example: "6893eaba2ac0b16fa177be78"
+      responses:
+        "200":
+          description: Usuario encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  payload:
+                    $ref: "#/components/schemas/User"
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Error interno del servidor
+
+    put:
+      summary: Actualizar un usuario por ID
+      tags:
+        - Users
+      description: Actualiza los datos de un usuario existente.
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario a actualizar
+          schema:
+            type: string
+            example: "6893eaba2ac0b16fa177be78"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUser"
+      responses:
+        "200":
+          description: Usuario actualizado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User updated
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Error interno del servidor
+
+    delete:
+      summary: Eliminar un usuario por ID
+      tags:
+        - Users
+      description: Elimina un usuario de la base de datos según su ID.
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          description: ID del usuario a eliminar
+          schema:
+            type: string
+            example: "6893eaba2ac0b16fa177be78"
+      responses:
+        "200":
+          description: Usuario eliminado correctamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User deleted
+        "404":
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Error interno del servidor
