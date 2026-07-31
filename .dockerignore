@@ -1,8 +1,11 @@
 node_modules
+npm-debug.log
 .env
 .git
 .gitignore
-test
-README.md
 .DS_Store
+test
+coverage
 *.md
+.vscode
+.idea

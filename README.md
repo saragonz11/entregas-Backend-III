@@ -3,43 +3,97 @@
 **Curso:** Backend III – Testing y Escalabilidad  
 **Autora:** Sara González Londoño  
 
-API REST de adopción de mascotas con documentación Swagger, tests funcionales y Docker.
+API REST de adopción de mascotas con:
+
+1. Documentación Swagger del módulo **Users**
+2. Tests funcionales de `adoption.router.js`
+3. **Dockerfile** optimizado y reproducible
+4. Imagen publicada en **Docker Hub** (acceso público)
+5. **README.md** con instrucciones Docker + enlace a Docker Hub + Swagger Users
 
 ---
 
-## Para el evaluador – evidencia rápida
+## Link a la imagen en Docker Hub
 
-| Criterio | Evidencia | Cómo verificar |
-| -------- | --------- | -------------- |
-| Swagger módulo **Users** | `src/docs/Users.yaml`, `src/docs/Components.yaml` | Con el servidor arriba: [http://localhost:8080/docs](http://localhost:8080/docs) → tag **Users** |
-| Tests de `adoption.router.js` | `test/adoption.test.js` | `npm test` (cubre GET /, GET /:aid y POST /:uid/:pid – éxito y error) |
-| Dockerfile | `Dockerfile` | `docker build -t sari22/adoptme:1.0.0 .` |
-| Imagen en Docker Hub | Link público abajo | `docker pull sari22/adoptme:1.0.0` |
-| README con instrucciones Docker | Este archivo | Secciones *Docker Hub* y *Ejecutar con Docker* |
+**Imagen pública:** https://hub.docker.com/r/sari22/adoptme  
 
-### Endpoints de adopciones cubiertos por tests
-
-| Método | Ruta | Casos |
-| ------ | ---- | ----- |
-| `GET` | `/api/adoptions` | éxito (listado) |
-| `GET` | `/api/adoptions/:aid` | éxito / `404` no encontrada |
-| `POST` | `/api/adoptions/:uid/:pid` | éxito / `404` usuario / `404` mascota / `400` ya adoptada |
-
----
-
-## Imagen en Docker Hub
-
-**Link público:** [https://hub.docker.com/r/sari22/adoptme](https://hub.docker.com/r/sari22/adoptme)
+**Pull de la imagen:**
 
 ```bash
 docker pull sari22/adoptme:1.0.0
 ```
 
+- Repositorio: [https://hub.docker.com/r/sari22/adoptme](https://hub.docker.com/r/sari22/adoptme)
+- Tag: `sari22/adoptme:1.0.0`
+
 ---
 
-## Cómo levantar el proyecto (recomendado para corrección)
+## Criterios de la rúbrica (evidencia explícita)
 
-### Opción A – Docker Compose (API + Mongo)
+### 1. Creación y configuración del Dockerfile
+
+Se ha desarrollado un **Dockerfile optimizado y reproducible** para generar la imagen del proyecto de manera adecuada.
+
+- Archivo: [`Dockerfile`](./Dockerfile)
+- Multi-stage build (dependencias + producción)
+- Base: `node:20.11.0-alpine`
+- Instala dependencias con `npm ci --omit=dev`
+- Copia el código fuente (`./src`)
+- Expone el puerto `8080`
+- Comando de ejecución: `npm start`
+
+```bash
+docker build -t sari22/adoptme:1.0.0 .
+```
+
+### 2. Publicación en Docker Hub
+
+La imagen generada del proyecto ha sido **subida a Docker Hub** y es **accesible públicamente**.
+
+- Repositorio público: [https://hub.docker.com/r/sari22/adoptme](https://hub.docker.com/r/sari22/adoptme)
+- Imagen / tag: `sari22/adoptme:1.0.0`
+- Visibilidad: **pública** (`is_private: false`)
+
+```bash
+docker pull sari22/adoptme:1.0.0
+```
+
+### 3. Documentación en README.md y Swagger
+
+El README.md contiene:
+
+- Instrucciones claras para ejecutar el proyecto con **Docker**
+- El **enlace a Docker Hub**
+- La documentación de **Swagger para Users**
+
+| Recurso | Ubicación |
+| ------- | --------- |
+| Swagger UI (Users) | http://localhost:8080/docs |
+| Spec Users | `src/docs/Users.yaml` |
+| Schemas | `src/docs/Components.yaml` |
+| Endpoints Users documentados | `GET /api/users`, `GET /api/users/{uid}`, `PUT /api/users/{uid}`, `DELETE /api/users/{uid}` |
+
+### 4. Tests funcionales de `adoption.router.js`
+
+Archivo: `test/adoption.test.js`
+
+| Método | Ruta | Casos |
+| ------ | ---- | ----- |
+| `GET` | `/api/adoptions` | éxito (200, array) |
+| `GET` | `/api/adoptions/:aid` | éxito (200) / error (404) |
+| `POST` | `/api/adoptions/:uid/:pid` | éxito (200) / 404 usuario / 404 mascota / 400 ya adoptada |
+
+```bash
+npm test
+```
+
+---
+
+## Ejecutar el proyecto con Docker
+
+### Opción 1 – Docker Compose (recomendado para corrección)
+
+Levanta la API y MongoDB:
 
 ```bash
 docker compose up --build
@@ -47,14 +101,13 @@ docker compose up --build
 
 - API: http://localhost:8080  
 - Swagger Users: http://localhost:8080/docs  
-- Mongo: `localhost:27017`
+- MongoDB: `localhost:27017`
 
 ```bash
-# Detener
 docker compose down
 ```
 
-### Opción B – Imagen de Docker Hub + Mongo local/Atlas
+### Opción 2 – Imagen pública de Docker Hub
 
 ```bash
 docker pull sari22/adoptme:1.0.0
@@ -68,18 +121,18 @@ docker run -d \
   sari22/adoptme:1.0.0
 ```
 
-> Si usas Atlas, reemplaza `MONGO_URL` por tu connection string.  
-> `127.0.0.1` **no** funciona desde dentro del contenedor; usa Atlas o `host.docker.internal` (Mac/Windows).
+> Si usas MongoDB Atlas, reemplaza `MONGO_URL` por tu connection string.  
+> Dentro del contenedor no uses `127.0.0.1` para Mongo: usa Atlas o `host.docker.internal` (Mac/Windows).
 
-### Opción C – Node local
+### Opción 3 – Ejecución local con Node
 
 ```bash
-cp .env.example .env   # o crear .env manualmente
+cp .env.example .env
 npm install
 npm start
 ```
 
-Variables de entorno:
+Variables de entorno (`.env`):
 
 ```env
 PORT=8080
@@ -89,88 +142,74 @@ DB_NAME=adoptme
 
 ---
 
-## Cómo correr los tests
-
-Con MongoDB disponible (Compose: `docker compose up mongo -d`, o Atlas/local):
-
-```bash
-npm test
-```
-
-Archivo: `test/adoption.test.js`  
-Framework: Mocha + Chai + Supertest.
-
----
-
-## Documentación Swagger (Users)
+## Documentación Swagger – módulo Users
 
 Con el servidor en marcha:
 
-1. Abrir http://localhost:8080/docs  
-2. Revisar el tag **Users**:
-   - `GET /api/users`
-   - `GET /api/users/{uid}`
-   - `PUT /api/users/{uid}`
-   - `DELETE /api/users/{uid}`
+1. Abrir **http://localhost:8080/docs**
+2. Ir al tag **Users**
+3. Probar:
+   - `GET /api/users` – listar usuarios
+   - `GET /api/users/{uid}` – obtener usuario por id
+   - `PUT /api/users/{uid}` – actualizar usuario
+   - `DELETE /api/users/{uid}` – eliminar usuario
 
-Archivos: `src/docs/Users.yaml` y `src/docs/Components.yaml`.
+Archivos de documentación:
+
+- `src/docs/Users.yaml`
+- `src/docs/Components.yaml`
 
 ---
 
-## Construir y publicar la imagen
+## Construir y publicar la imagen (referencia)
 
 ```bash
-# Construir
+# Construir imagen reproducible desde el Dockerfile
 docker build -t sari22/adoptme:1.0.0 .
 
-# Publicar (ya subida; comando de referencia)
+# Publicar en Docker Hub (imagen ya publicada y pública)
 docker login
 docker push sari22/adoptme:1.0.0
 ```
 
-El `Dockerfile`:
-
-1. Usa `node:20.11.0`
-2. Instala dependencias (`npm install`)
-3. Copia el código (`./src`)
-4. Expone el puerto `8080`
-5. Ejecuta `npm start`
+Enlace público de la imagen: [https://hub.docker.com/r/sari22/adoptme](https://hub.docker.com/r/sari22/adoptme)
 
 ---
 
-## Prueba rápida de la API
+## Prueba rápida
 
 ```bash
 curl http://localhost:8080/api/users
+curl http://localhost:8080/docs
 curl -X POST "http://localhost:8080/api/mocks/generateData?users=2&pets=2"
 curl http://localhost:8080/api/adoptions
 ```
 
 ---
 
-## Estructura relevante para la entrega
+## Estructura relevante
 
 ```
-├── Dockerfile
-├── docker-compose.yml
-├── README.md
+├── Dockerfile                 # Multi-stage, optimizado y reproducible
+├── docker-compose.yml         # App + Mongo para prueba local
+├── README.md                  # Este archivo (Docker + Docker Hub + Swagger)
 ├── src/
-│   ├── app.js                 # Express + Swagger en /docs
+│   ├── app.js                 # Express + Swagger UI en /docs
 │   ├── docs/
-│   │   ├── Users.yaml         # Documentación módulo Users
+│   │   ├── Users.yaml         # Documentación Swagger del módulo Users
 │   │   └── Components.yaml
 │   └── routes/
 │       └── adoption.router.js
 └── test/
-    └── adoption.test.js       # Tests funcionales de adoptions
+    └── adoption.test.js       # Tests funcionales (éxito y error)
 ```
 
 ---
 
-## Checklist de criterios
+## Checklist de entrega
 
-- [x] Documentar con Swagger el módulo Users  
-- [x] Tests funcionales de todos los endpoints de `adoption.router.js` (éxito y error)  
-- [x] Dockerfile para generar la imagen de forma reproducible  
-- [x] Imagen publicada en Docker Hub con link público en este README  
-- [x] Instrucciones claras para construir, ejecutar y usar el proyecto con Docker  
+- [x] Dockerfile optimizado y reproducible (multi-stage + `npm ci --omit=dev`)
+- [x] Imagen subida a Docker Hub y accesible públicamente: [sari22/adoptme](https://hub.docker.com/r/sari22/adoptme)
+- [x] README con instrucciones Docker, enlace a Docker Hub y Swagger Users
+- [x] Swagger del módulo Users en `/docs`
+- [x] Tests funcionales completos de `adoption.router.js`
